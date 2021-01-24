@@ -85,7 +85,7 @@ def add_background(dirpath, video, background):
 
 
 def get_videos(id, video_id, output, background):
-    headers = {'Authorization': '73f1516e6ce4b2a656ed75c63c2499f7'}
+    headers = {'Authorization': 'XXXXXXXXXXXXXXXXXXXX'}
     status = ''
     print("Processing the video with ID:" + video_id)
     while status != "COMPLETE":
