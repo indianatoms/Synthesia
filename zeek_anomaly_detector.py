@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # This file is part of the Stratosphere Linux IPS
 # See the file 'LICENSE' for copying permission.
-# Authors:
+# Authors:pi
 # - Sebastian Garcia. eldraco@gmail.com,
 #   sebastian.garcia@agents.fel.cvut.cz
 # - Veronica Valeros. vero.valeros@gmail.com
@@ -22,7 +22,14 @@ from pyod.models.pca import PCA
 # from pyod.models.sos import SOS  # Needs keras
 # from pyod.models.xgbod import XGBOD # Needs keras
 # from pyod.models.knn import KNN   # kNN detector
+import argparse
 import warnings
+import boto3 as bt
+import s3fs
+
+#s3 = bt.resource(service_name = "s3", region_name = "eu-west-1", aws_access_key_id = "AKIAVQ32J2O327KCA5ZO", aws_secret_access_key = "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")
+
+
 
 
 # This horrible hack is only to stop sklearn from printing those warnings
@@ -41,13 +48,16 @@ def detect(file, amountanom, realtime, dumptocsv):
     """
 
     # Create a Pandas dataframe from the conn.log
-    bro_df = pd.read_csv(file, sep="\t", comment='#', names=['ts',  'uid', 'id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto', 'service', 'duration',  'orig_bytes', 'resp_bytes', 'conn_state', 'local_orig', 'local_resp', 'missed_bytes',  'history', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes', 'tunnel_parents'])
+    bro_df = pd.read_csv(file, sep="\t", comment='#',
+                         names=['ts', 'uid', 'id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto', 'service',
+                                'duration', 'orig_bytes', 'resp_bytes', 'conn_state', 'local_orig', 'local_resp',
+                                'missed_bytes', 'history', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes',
+                                'tunnel_parents'])
 
     # In case you need a label, due to some models being able to work in a
     # semisupervized mode, then put it here. For now everything is
     # 'normal', but we are not using this for detection
     bro_df['label'] = 'normal'
-
 
     # Replace the rows without data (with '-') with 0.
     # Even though this may add a bias in the algorithms,
@@ -72,7 +82,8 @@ def detect(file, amountanom, realtime, dumptocsv):
         bro_df.to_csv(dumptocsv)
 
     # Add the columns from the log file that we know are numbers. This is only for conn.log files.
-    X_train = bro_df[['duration', 'orig_bytes', 'id.resp_p', 'resp_bytes', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']]
+    X_train = bro_df[
+        ['duration', 'orig_bytes', 'id.resp_p', 'resp_bytes', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']]
 
     # Our y is the label. But we are not using it now.
     y = bro_df.label
@@ -126,10 +137,10 @@ def detect(file, amountanom, realtime, dumptocsv):
     # clf = KNN()
     # clf = KNN(n_neighbors=10)
     #################
-    
+
     # extract the value of dataframe to matrix
     X_train = X_train.values
-    
+
     # Fit the model to the train data
     clf.fit(X_train)
 
@@ -161,7 +172,13 @@ def detect(file, amountanom, realtime, dumptocsv):
     print('\nFlows of the top anomalies')
 
     # Only print some columns, not all, so its easier to read.
-    df_to_print = df_to_print.drop(['conn_state', 'history', 'local_orig', 'local_resp', 'missed_bytes', 'ts', 'tunnel_parents', 'uid', 'label'], axis=1)
+    df_to_print = df_to_print.drop(
+        ['conn_state', 'history', 'local_orig', 'local_resp', 'missed_bytes', 'ts', 'tunnel_parents', 'uid', 'label'],
+        axis=1)
+    bytes_to_write = df_to_print.to_csv(None).encode()
+    fs = s3fs.S3FileSystem(key="AKIAVQ32J2O327KCA5ZO", secret="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")
+    with fs.open('s3://output-buck-tom/output.csv', 'wb') as f:
+        f.write(bytes_to_write)
     print(df_to_print)
 
 
@@ -169,4 +186,9 @@ if __name__ == '__main__':
     print('Simple Anomaly Detector for Zeek conn.log files. Version: 0.2')
     print('Author: Sebastian Garcia (eldraco@gmail.com), Veronica Valeros (vero.valeros@gmail.com)')
 
-    detect('conn.log', 10, False, None)
+    #s3 = bt.client('s3', aws_access_key_id = "AKIAVQ32J2O327KCA5ZO", aws_secret_access_key = "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")
+    s3 = bt.resource(service_name = "s3", region_name = "eu-west-1", aws_access_key_id = "AKIAVQ32J2O327KCA5ZO", aws_secret_access_key = "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")
+    s3.meta.client.download_file('init-buck', 'conn.log', 'connloc.log')
+
+
+    detect('connloc.log', 10, False, None)
