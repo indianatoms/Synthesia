@@ -27,11 +27,6 @@ import warnings
 import boto3 as bt
 import s3fs
 
-#s3 = bt.resource(service_name = "s3", region_name = "eu-west-1", aws_access_key_id = "AKIAVQ32J2O327KCA5ZO", aws_secret_access_key = "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")
-
-
-
-
 # This horrible hack is only to stop sklearn from printing those warnings
 def warn(*args, **kwargs):
     pass
@@ -186,8 +181,7 @@ if __name__ == '__main__':
     print('Simple Anomaly Detector for Zeek conn.log files. Version: 0.2')
     print('Author: Sebastian Garcia (eldraco@gmail.com), Veronica Valeros (vero.valeros@gmail.com)')
 
-    #s3 = bt.client('s3', aws_access_key_id = "AKIAVQ32J2O327KCA5ZO", aws_secret_access_key = "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")
-    s3 = bt.resource(service_name = "s3", region_name = "eu-west-1", aws_access_key_id = "AKIAVQ32J2O327KCA5ZO", aws_secret_access_key = "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")
+    s3 = bt.resource(service_name = "s3", region_name = "eu-west-1", aws_access_key_id = "*********", aws_secret_access_key = "*********")
     s3.meta.client.download_file('init-buck', 'conn.log', 'connloc.log')
 
 
