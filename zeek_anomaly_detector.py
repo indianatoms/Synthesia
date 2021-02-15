@@ -176,7 +176,7 @@ def detect(file, amountanom, realtime, dumptocsv):
         ['conn_state', 'history', 'local_orig', 'local_resp', 'missed_bytes', 'ts', 'tunnel_parents', 'uid', 'label'],
         axis=1)
     bytes_to_write = df_to_print.to_csv(None).encode()
-    fs = s3fs.S3FileSystem(key="AKIAVQ32J2O327KCA5ZO", secret="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")
+    fs = s3fs.S3FileSystem(key="************", secret="*************************")
     with fs.open('s3://output-buck-tom/output.csv', 'wb') as f:
         f.write(bytes_to_write)
     print(df_to_print)
