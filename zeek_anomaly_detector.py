@@ -22,7 +22,6 @@ from pyod.models.pca import PCA
 # from pyod.models.sos import SOS  # Needs keras
 # from pyod.models.xgbod import XGBOD # Needs keras
 # from pyod.models.knn import KNN   # kNN detector
-import argparse
 import warnings
 
 
@@ -169,15 +168,5 @@ def detect(file, amountanom, realtime, dumptocsv):
 if __name__ == '__main__':
     print('Simple Anomaly Detector for Zeek conn.log files. Version: 0.2')
     print('Author: Sebastian Garcia (eldraco@gmail.com), Veronica Valeros (vero.valeros@gmail.com)')
-
-    # # Parse the parameters
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-v', '--verbose', help='Amount of verbosity. This shows more info about the results.', action='store', required=False, type=int)
-    # parser.add_argument('-e', '--debug', help='Amount of debugging. This shows inner information about the program.', action='store', required=False, type=int)
-    # parser.add_argument('-f', '--file', help='Path to the conn.log input file to read.', required=True)
-    # parser.add_argument('-a', '--amountanom', help='Amount of anomalies to show.', required=False, default=10, type=int)
-    # parser.add_argument('-R', '--realtime', help='Read the conn.log in real time.', required=False, type=bool, default=False)
-    # parser.add_argument('-D', '--dumptocsv', help='Dump the conn.log DataFrame to a csv file', required=False)
-    # args = parser.parse_args()
 
     detect('conn.log', 10, False, None)
